@@ -2,6 +2,10 @@
 
 A lightweight public edition of an AI-assisted wellbeing conversation application built with React, TypeScript and Supabase.
 
+## Live demo
+
+**Try it online:** https://xinling-ai.lovable.app/
+
 > **Scope:** This repository is a standalone software demo. It is not a medical device, does not provide diagnosis or treatment, and is not a substitute for professional or emergency care.
 
 ## What is included
