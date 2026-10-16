@@ -19,6 +19,7 @@
 | --- | --- |
 | 🗣️ **写下心情** — 在聊天界面记录感受与想法 | **Express yourself** — Put thoughts and feelings into words in a simple chat interface |
 | 💭 **AI 辅助对话** — 体验逐步显示的 AI 回复 | **Streaming AI chat** — See assistant responses appear as they are generated |
+| 🎙️ **语音对话** — 麦克风转文字、AI 语音回复与六种音色选择 | **Voice conversations** — Speech-to-text, spoken AI replies, and six selectable voice profiles |
 | 🌿 **轻量界面** — 简单的登录、输入与聊天流程 | **Focused experience** — A minimal sign-in and conversation flow |
 | 🛠️ **可研究的技术示例** — React、TypeScript、Supabase 和 Edge Functions | **Developer-friendly demo** — Explore a React, TypeScript, Supabase and Edge Functions implementation |
 
@@ -26,7 +27,7 @@
 
 1. 打开 [在线体验 / Live demo](https://xinling-ai.lovable.app/)。 / Open the live demo.
 2. 按页面提示注册或登录（需要邮箱与密码；是否需要邮件验证取决于网站配置）。 / Sign up or sign in using the on-screen instructions.
-3. 在输入框里写下想说的话并发送。 / Type a thought or message and send it.
+3. 在输入框里写下想说的话并发送，或切换到“语音”模式并允许麦克风权限。 / Send a text message, or switch to Voice and grant microphone access.
 
 > **关于演示版 / Demo scope:** 公开仓库是独立、精简的软件示例，可能与在线网站的部署配置或其他版本功能不同。本仓库本身不包含可直接访问的线上用户数据。 / This repository is a standalone public edition and may differ from the live deployment or other editions; it does not expose hosted user records.
 
@@ -38,12 +39,14 @@
 | --- | --- |
 | 邮箱登录与注册 / Email sign-in & sign-up | Supabase Auth |
 | 对话界面 / AI chat | 流式回复界面 / Streaming response UI |
+| 语音输入 / Voice input | 浏览器麦克风录音 + 服务器端语音转写 / Browser recording + server-side transcription |
+| 语音回复 / Spoken AI replies | 流式 PCM 音频播放，六种预置音色及试听 / Streamed PCM playback, six voice profiles and preview |
 | 用户范围隔离 / Per-user data scoping | 使用 Supabase Row Level Security (RLS) 的训练/上下文数据 |
 | 管理功能 / Admin features | 经授权的角色才可使用 / Available to authorized roles |
 | 服务端访问 / Backend calls | 携带登录凭证的 Supabase Edge Function 请求 / JWT-authenticated Edge Function |
 | 敏感凭据 / Secrets | 不写入仓库；服务端变量另行配置 / Kept out of the public repository |
 
-**代码导览 / Code map:** [聊天和登录界面](src/App.tsx) · [样式](src/index.css) · [Supabase 客户端](src/lib/supabase.ts) · [边缘函数](supabase/functions/chat-therapy/index.ts) · [安全指南](SECURITY.md)
+**代码导览 / Code map:** [聊天和登录界面](src/App.tsx) · [语音播放](src/lib/speechPlayer.ts) · [样式](src/index.css) · [Supabase 客户端](src/lib/supabase.ts) · [聊天函数](supabase/functions/chat-therapy/index.ts) · [语音识别函数](supabase/functions/voice-transcribe/index.ts) · [语音合成函数](supabase/functions/voice-speech/index.ts) · [安全指南](SECURITY.md)
 
 **技术栈 / Stack:** React 18 · TypeScript · Vite · Supabase Auth + PostgreSQL + RLS · Supabase Edge Functions
 
@@ -83,7 +86,12 @@ VITE_SUPABASE_PUBLISHABLE_KEY=YOUR_PUBLIC_ANON_KEY
 
 1. 创建独立的 Supabase 项目。 / Create a dedicated Supabase project.
 2. 应用 [`supabase/migrations/001_init.sql`](supabase/migrations/001_init.sql)。 / Apply the database migration.
-3. 部署 [`supabase/functions/chat-therapy/index.ts`](supabase/functions/chat-therapy/index.ts) 为 Edge Function。 / Deploy the Edge Function.
+3. 分别部署 `chat-therapy`、`voice-transcribe` 和 `voice-speech` 三个 Supabase Edge Functions（位于 [supabase/functions](supabase/functions)）。 / Deploy all three Edge Functions.
+   ```bash
+   supabase functions deploy chat-therapy
+   supabase functions deploy voice-transcribe
+   supabase functions deploy voice-speech
+   ```
 4. 仅在服务端安全环境中配置以下变量。 / Configure the following **server-side secrets only**:
 
 ```text
@@ -94,7 +102,11 @@ LOVABLE_API_KEY
 
 **管理员 / Admin:** 部署后按需要手动配置角色。不要提交真实管理员 UUID 或邮箱。 / Assign admin roles manually; never hard-code real admin identities.
 
-**开放注册前 / Before public sign-up:** 为收费 AI 端点增加限流、配额、机器人防护及成本监控。 / Add rate limits, quotas, bot protection, and spending alerts before exposing paid AI endpoints.
+**开放注册前 / Before public sign-up:** 为聊天、语音转写与语音合成等收费端点增加限流、配额、机器人防护及成本监控。 / Add rate limits, quotas, bot protection, and cost alerts for paid chat, transcription, and TTS endpoints.
+
+**语音注意事项 / Voice note:** 语音录制需 HTTPS/localhost、浏览器麦克风权限与可正常访问的 Supabase Edge Functions。音频会发送给配置的 AI 网关处理；公开版代码不存储语音录音，但服务提供商的数据处理规则仍适用。部分语音模型与 API 可用性取决于你自己的 Lovable AI Gateway 配置，不能仅通过克隆仓库保证可用。 / Voice requires HTTPS/localhost, microphone permission, deployed Edge Functions, and an AI gateway account supporting the configured speech models. Audio is transmitted to the AI gateway; the public source does not persist recordings. Review the provider's data-processing policies.
+
+**版本说明 / Edition note:** 新增语音功能移植自 2026-10-16 的 Lovable 项目版本；本仓库仍是独立公开精简版，未逐文件复制生产环境与数据库。 / Voice features were adapted from the 2026-10-16 Lovable project; this remains a standalone public edition, not a byte-for-byte production deployment.
 
 ---
 

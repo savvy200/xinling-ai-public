@@ -1,0 +1,8 @@
+[functions.chat-therapy]
+verify_jwt = true
+
+[functions.voice-speech]
+verify_jwt = true
+
+[functions.voice-transcribe]
+verify_jwt = true

@@ -15,9 +15,10 @@ Before deploying a fork or public demo:
 5. Test that one authenticated user cannot read or modify another user's rows.
 6. Assign administrative roles manually; do not commit real user IDs or emails.
 7. Review Supabase Auth settings before enabling unrestricted public signup.
-8. Add rate limiting, quotas, bot protection and cost alerts before exposing a paid AI endpoint publicly.
-9. Avoid using confidential, clinical, identifiable or otherwise sensitive personal information in a demo deployment unless the necessary governance and security controls are independently in place.
-10. Rotate credentials immediately if a privileged credential is ever committed or exposed.
+8. Add rate limiting, quotas, bot protection and cost alerts before exposing paid chat, transcription, or text-to-speech endpoints publicly. Validate audio MIME type and upload limits.
+9. Check microphone permissions, explain external audio processing, and avoid retaining or logging raw recordings without explicit consent.
+10. Avoid using confidential, clinical, identifiable or otherwise sensitive personal information in a demo deployment unless the necessary governance and security controls are independently in place.
+11. Rotate credentials immediately if a privileged credential is ever committed or exposed.
 
 ## Repository boundary
 
